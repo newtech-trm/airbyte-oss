@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # Postgres Database
+  db:
+    image: postgres:13
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: airbyte
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: airbyte
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  # Airbyte Init
+  init:
+    image: airbyte/init:${AIRBYTE_VERSION:-latest}
+    environment:
+      DATABASE_URL: postgresql://airbyte:password@db:5432/airbyte
+      DATABASE_USER: airbyte
+      DATABASE_PASSWORD: password
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_DB: airbyte
+    depends_on:
+      - db
+
+  # Airbyte Bootloader
+  bootloader:
+    image: airbyte/bootloader:${AIRBYTE_VERSION:-latest}
+    environment:
+      DATABASE_URL: postgresql://airbyte:password@db:5432/airbyte
+      DATABASE_USER: airbyte
+      DATABASE_PASSWORD: password
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_DB: airbyte
+    depends_on:
+      - db
+
+  # Airbyte Server
+  server:
+    image: airbyte/server:${AIRBYTE_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://airbyte:password@db:5432/airbyte
+      DATABASE_USER: airbyte
+      DATABASE_PASSWORD: password
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_DB: airbyte
+      AIRBYTE_VERSION: ${AIRBYTE_VERSION:-latest}
+      AIRBYTE_ROLE: ${AIRBYTE_ROLE:-dev}
+      AIRBYTE_URL: ${RAILWAY_STATIC_URL:-http://localhost:8001}
+    ports:
+      - "8001:8001"
+    depends_on:
+      - bootloader
+
+  # Airbyte WebApp
+  webapp:
+    image: airbyte/webapp:${AIRBYTE_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      AIRBYTE_ROLE: ${AIRBYTE_ROLE:-dev}
+      AIRBYTE_VERSION: ${AIRBYTE_VERSION:-latest}
+      API_URL: ${RAILWAY_STATIC_URL:-http://localhost:8001}/api/v1/
+      AIRBYTE_URL: ${RAILWAY_STATIC_URL:-http://localhost:8000}
+    ports:
+      - "${PORT:-8000}:80"
+    depends_on:
+      - server
+
+volumes:
+  db_data: 

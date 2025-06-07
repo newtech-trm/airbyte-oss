@@ -1,8 +1,62 @@
-.dockerignore
+# Git
 .git
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Node modules
+node_modules
+npm-debug.log
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+pip-log.txt
+
+# Java
+*.class
+*.jar
+target/
+.gradle/
+build/
+
+# IDE
+.vscode
 .idea
-.gradle
-**/build
-**/node_modules
-Dockerfile.*
-docker-compose*.yaml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Test files
+test
+tests
+.pytest_cache
+
+# Documentation
+docs
+*.md
+!README.md
+
+# CI/CD
+.github
+.circleci
+
+# Large directories that aren't needed for runtime
+airbyte-ci/
+tools/
+gradle/

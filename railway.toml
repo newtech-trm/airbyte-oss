@@ -1,0 +1,11 @@
+[build]
+buildCommand = "echo 'Building Airbyte for Railway...'"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[experimental]
+incrementalBuildPaths = ["src"] 
